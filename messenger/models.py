@@ -1,7 +1,7 @@
 from django.db import models
 
-class Message(models.Model):
 
+class Message(models.Model):
     sender = models.CharField(max_length=20)
     receiver = models.CharField(max_length=20)
     message = models.CharField(max_length=3000)
@@ -10,7 +10,7 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
 
     def __json__(self):
-        return {"sender":self.sender,
+        return {"sender": self.sender,
                 "receiver": self.receiver,
                 "message": self.message,
                 "subject": self.subject,

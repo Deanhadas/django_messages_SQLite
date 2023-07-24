@@ -29,8 +29,11 @@ def get_all_messages(request):
         token = request.auth
         user = Token.objects.get(key=token).user
         all_messages = Message.objects.filter(receiver=user.username)
-        serialized_obj = [json.dumps(message.__json__()) for message in all_messages]
-        return Response(serialized_obj)
+        messages = [message.__dict__ for message in all_messages]
+        for message in messages:
+            if '_state' in message.keys():
+                del message['_state']
+        return Response(messages)
     except Token.DoesNotExist:
         return Response({"error": "Invalid token"}, status=401)
 
