@@ -45,8 +45,11 @@ def get_all_unread_messages(request):
         token = request.auth
         user = Token.objects.get(key=token).user
         all_messages = Message.objects.filter(receiver=user.username, is_read=False)
-        serialized_obj = [message.__json__() for message in all_messages]
-        return Response(serialized_obj)
+        messages = [message.__dict__ for message in all_messages]
+        for message in messages:
+            if '_state' in message.keys():
+                del message['_state']
+        return Response(messages)
     except Token.DoesNotExist:
         return Response({"error": "Invalid token"}, status=401)
 
@@ -60,8 +63,7 @@ def read_message(requset, message_id):
         message = Message.objects.get(receiver=user.username, id=message_id)
         message.is_read = True
         message.save()
-        serialized_obj = json.dumps(message.__json__())
-        return Response(serialized_obj)
+        return Response(message.__json__())
     except Message.DoesNotExist:
         return Response({"error": "Message not found"}, status=404)
 
