@@ -5,17 +5,17 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view ,permission_classes
 from .models import Message
-#from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 #from .serializers import MessageSerializer
 #from django.core import serializers
 
 
-#from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 
 import json
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def test(requset):
     mini_json={"ronron":"pop"}
 
@@ -23,6 +23,7 @@ def test(requset):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def write_message(requset):
     res = json.loads(requset.body)
     print(res)
@@ -43,15 +44,15 @@ def write_message(requset):
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_all_messages(requset,receiver):
     print(requset)
     print(receiver)
-    #token = requset.auth
-    #user = Token.objects.get(key=token).user
+    token = requset.auth
+    user = Token.objects.get(key=token).user
     #print(user.username)
     #all_messages = Message.objects(receiver=user.username)
-    all_messages = Message.objects.filter(receiver=receiver)
+    all_messages = Message.objects.filter(receiver=user.username)
     print(all_messages)
     serialized_obj = [json.dumps(message.__json__()) for message in all_messages]
     # serialized_obj = serializers.serialize('json', all_messages)
@@ -60,12 +61,12 @@ def get_all_messages(requset,receiver):
     return Response(serialized_obj)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_all_unread_messages(requset,receiver):
-    #token = requset.auth
-    #user = Token.objects.get(key=token).user
+    token = requset.auth
+    user = Token.objects.get(key=token).user
     #all_messages = Message.objects(receiver=user.username, is_read=False)
-    all_messages = Message.objects.filter(receiver=receiver, is_read=False)
+    all_messages = Message.objects.filter(receiver=user.username, is_read=False)
     print(all_messages)
     serialized_obj = [message.__json__() for message in all_messages]
     #serialized_obj = [json.dumps(message.__json__()) for message in all_messages]
@@ -78,13 +79,13 @@ def get_all_unread_messages(requset,receiver):
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def read_message(requset, message_id):
-    # token = requset.auth
-    # user = Token.objects.get(key=token).user
-    #message = Message.objects.get(receiver=user.username, id=message_id)
+    token = requset.auth
+    user = Token.objects.get(key=token).user
+    message = Message.objects.get(receiver=user.username, id=message_id)
 
-    message = Message.objects.get(id=message_id)
+   # message = Message.objects.get(id=message_id)
     message.is_read = True
     message.save()
     serialized_obj = json.dumps(message.__json__())
