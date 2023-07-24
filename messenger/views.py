@@ -24,7 +24,7 @@ def write_message(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_all_messages(request):
+def get_all_messages_as_receiver(request):
     try:
         token = request.auth
         user = Token.objects.get(key=token).user
@@ -36,6 +36,25 @@ def get_all_messages(request):
         return Response(messages)
     except Token.DoesNotExist:
         return Response({"error": "Invalid token"}, status=401)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_messages_as_sender(request):
+    try:
+        token = request.auth
+        user = Token.objects.get(key=token).user
+        all_messages = Message.objects.filter(sender=user.username)
+        messages = [message.__dict__ for message in all_messages]
+        for message in messages:
+            if '_state' in message.keys():
+                del message['_state']
+        return Response(messages)
+    except Token.DoesNotExist:
+        return Response({"error": "Invalid token"}, status=401)
+
+
 
 
 @api_view(['GET'])
